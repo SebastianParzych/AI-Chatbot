@@ -1,0 +1,6 @@
+*.iml
+.DS_Store
+*.xml
+*.pdf
+venv/
+.idea/
