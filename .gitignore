@@ -1,4 +1,6 @@
 *.iml
+__pycache__
+.vs
 .DS_Store
 *.xml
 *.pdf

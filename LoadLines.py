@@ -1,7 +1,7 @@
+from os import stat
 import pandas as pd
 from datetime import datetime
 import sys
-
 
 class LoadLines():
 	'''
@@ -13,6 +13,11 @@ class LoadLines():
 		self.movie_conversations=[]
 		self.input=[]
 		self.target=[]
+	def get_input_target(self):
+		'''
+		Get input and target senteces list. ( In case of not having .csv file)
+		'''
+		return self.input , self.target
 	def write_csv(self):
 		'''
 		Write results of splitting data into input-target sets into .csv file
@@ -20,13 +25,14 @@ class LoadLines():
 		df = pd.DataFrame(self.input)
 		df1 = pd.DataFrame(self.target)
 		pd.concat([df, df1], axis=1).to_csv('data/Data_formatted.csv', sep='\t')
+	@staticmethod
 	def read_csv(self):
 		'''
 		Read previously written .csv file and extract input-target columns
 		:return: Input,Predict lines
 		'''
 		df = pd.read_csv('data/Data_formatted.csv', sep='\t')
-		return df['train_t'], df['predict_t']
+		return df['input_val'], df['target_val']
 	def Movie_lines_load(self):
 		'''
 		Insert into a list of dicts data from movie_lines.txt
@@ -128,8 +134,10 @@ class LoadLines():
 		sys.stdout.flush()
 if __name__ == '__main__':
 	'''
-	Initial setup to write results to .csv (Estimated 31 seconds saved) 
+	Initial setup to write results to .csv (Estimated 50 seconds saved in future work on datasets) 
 	'''
 	lines = LoadLines()
+	# input,target=lines.read_csv()
+	# pd.set_option("display.max_rows", None, "display.max_columns", None)
 	lines.Extracting_Lines()
-	lines.write_csv()
+	#lines.write_csv()
