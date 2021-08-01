@@ -26,7 +26,7 @@ class LoadLines():
 		df1 = pd.DataFrame(self.target)
 		pd.concat([df, df1], axis=1).to_csv('data/Data_formatted.csv', sep='\t')
 	@staticmethod
-	def read_csv(self):
+	def read_csv():
 		'''
 		Read previously written .csv file and extract input-target columns
 		:return: Input,Predict lines
