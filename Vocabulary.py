@@ -1,6 +1,7 @@
+from tensorflow.python.keras.backend import dtype
 from LoadLines import LoadLines
 import re
-
+import numpy as np
 class Vocabulary:
 	def __init__(self,data_range=1.0,max_len=10,min_len=1,min_number=2):
 		'''
@@ -29,16 +30,29 @@ class Vocabulary:
 		self.cleaning()
 		word_count= self.count_appears(self.Target_raw+self.Input_raw)
 		self.trim_sentences(word_count)
+	def get_model_data(self):
+		'''
+		return:
 
+  		'''
 		input_index_word, input_word_index, input_max_words= self.features_set(self.Input_set,False)
 		target_index_word, target_word_index, target_max_words= self.features_set(self.Target_set,True)
-		self.INPUT_VOCAB_SIZE=len(input_word_index)
-		self.TARGET_VOCAB_SIZE=len(target_index_word)
-	
-		input_tokens=self.tokenize(self.Input_set,input_word_index,input_max_words)
-		target_tokens=self.tokenize(self.Target_set,target_word_index,target_max_words)
   
-		self.summaryOfCleaning()
+		# Initializing empty datasets for models
+		encoder_input = np.zeros((len(self.Input_set),input_max_words,len(input_index_word)),dtype='float32')
+		decoder_input = np.zeros((len(self.Input_set),target_max_words,len(target_index_word)),dtype='float32')
+		decoder_output = np.zeros((len(self.Target_set),target_max_words,len(target_index_word)),dtype='float32')
+  
+		for line,(input,target) in enumerate(zip(self.Input_set,self.Target_set)):
+			for timestemp,token in enumerate(input):
+				encoder_input[line,timestemp,input_word_index[token]]=1
+			for timestemp,token in enumerate(target):
+				decoder_output[line,timestemp,target_word_index[token]]=1
+				if timestemp>0:
+					decoder_input[line,timestemp-1,target_word_index[token]]=1
+
+		return encoder_input,decoder_input,decoder_output
+
 	def vocabulary_parameters(self):
 		'''
 		Show the values of the parameters used in creating the vocabulary.
@@ -212,40 +226,7 @@ class Vocabulary:
 		print(f'Number of deleted words from default  vocabulary: {self.deleted}')
 		print(f'Deleted sentences due  to rare words: {len(self.Input_raw)-len(self.Input_set)}')
 		print('--------------------------------------------------------------')
-	@staticmethod
-	def pad(l,content,max_words):
-		'''
-		Padd sentences.
-		args:
-			l: list
-				sentence written in indexes.
-			content: int
-				padded value
-			max_words: int
-				length of padded sentence
-		return l: list
-  		'''
-		l.extend([content]* (max_words - len(l)))
-		return l
-	def tokenize(self,data,word_index,max_words):
-		'''
-		Tokenize sentences using the features dict.
-		args:
-			data:
-				Input/Target set
-			word_index:
-				features dict for input/target sets
-			max_words:
-				length of padded sentences.
-		return: tokenized_data: list
-		'''
-		tokenized_data = [] 
-		for sentence in data:
-			tokenized_sentence = []
-			for word in sentence:
-				tokenized_sentence.append(word_index[word])
-			tokenized_data.append(Vocabulary.pad(tokenized_sentence,0,max_words))
-		return tokenized_data
+
 
 if __name__ == '__main__':
-    vocab=Vocabulary(data_range=1,max_len=10,min_len=2,min_number=1)
+    vocab=Vocabulary(data_range=1,max_len=10,min_len=3,min_number=3)
