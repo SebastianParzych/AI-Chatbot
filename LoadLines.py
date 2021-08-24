@@ -85,7 +85,7 @@ class LoadLines():
 		print('Extracting lines...')
 		deleted=0
 		for i,dialog in enumerate(self.movie_conversations.copy()):
-			self.update_progress(i/len(self.movie_conversations))
+			LoadLines.update_progress(i/len(self.movie_conversations))
 			for index, ID in enumerate(dialog['LinesIDs']):
 				line=self.find_line(ID.strip(), temp_lines)
 				if index == len(dialog['LinesIDs'])-1 and not (index+1) %2==0: # Skip last element if its odd
@@ -112,6 +112,7 @@ class LoadLines():
 				text=line['text']
 				temp_lines.remove(line)
 				return text
+	@staticmethod
 	def update_progress(self,progress):
 		'''
 		Progress Bar printing

@@ -2,6 +2,7 @@ from tensorflow.python.keras.backend import dtype
 from LoadLines import LoadLines
 import re
 import numpy as np
+import pandas as pd
 class Vocabulary:
 	def __init__(self,data_range=1.0,max_len=10,min_len=1,min_number=2):
 		'''
@@ -37,7 +38,7 @@ class Vocabulary:
   		'''
 		input_index_word, input_word_index, input_max_words= self.features_set(self.Input_set,False)
 		target_index_word, target_word_index, target_max_words= self.features_set(self.Target_set,True)
-  
+		self.write_to_csv_index_words(input_index_word, target_index_word)
 		# Initializing empty datasets for models
 		encoder_input = np.zeros((len(self.Input_set),input_max_words,len(input_index_word)),dtype='float32')
 		decoder_input = np.zeros((len(self.Input_set),target_max_words,len(target_index_word)),dtype='float32')
@@ -53,6 +54,25 @@ class Vocabulary:
 
 		return encoder_input,decoder_input,decoder_output
 
+	@staticmethod
+	def get_xd(data_set,input_max_words,input_index_word):
+		model_io= np.zeros((len(data_set),input_max_words,len(input_index_word)),dtype='float32')
+		for line,input in enumerate(data_set):
+			for timestemp,token in enumerate(input):
+				model_io[line,timestemp,token]=1
+		return model_io
+	def write_to_csv_index_words(self,input_index_word,target_index_word):
+		''' Save vocabularies of future chatbot to csve'''
+		df_input=pd.DataFrame.from_dict(input_index_word,orient='index',columns=['word'])
+		df_target=pd.DataFrame.from_dict(target_index_word,orient='index',columns=['word'])
+		df_input.index.name='index'
+		df_target.index.name='index'
+		df_input.to_csv('data/input_vocabulary.csv')
+		df_target.to_csv('data/target_vocabulary.csv')
+  
+	@staticmethod
+	def read_csv_index_words():
+		return pd.read_csv('data/input_targete_vocabulary.csv')
 	def vocabulary_parameters(self):
 		'''
 		Show the values of the parameters used in creating the vocabulary.
@@ -79,8 +99,8 @@ class Vocabulary:
 			if filtered_index >= self.data_range:
 				break
 			try:
-				input_temp=self.normalize(input_line)
-				target_temp=self.normalize(target_line)
+				input_temp=Vocabulary.normalize(input_line)
+				target_temp=Vocabulary.normalize(target_line)
 				if self.filter_length(input_line,target_line):
 					input.append(input_temp.split(' '))
 					target.append(('<BOS> '+target_temp+' <EOS>').split(' '))
@@ -90,8 +110,8 @@ class Vocabulary:
 				pass
 		self.Input_raw= input
 		self.Target_raw=target
-
-	def normalize(self,s):
+	@staticmethod
+	def normalize(s):
 		'''
 		Normalization of a sentences.
 		arg:
@@ -229,4 +249,5 @@ class Vocabulary:
 
 
 if __name__ == '__main__':
-    vocab=Vocabulary(data_range=1,max_len=10,min_len=3,min_number=3)
+    vocab=Vocabulary(data_range=0.5,max_len=8,min_len=4,min_number=3) # initiate vocabulary object with specific parameteres
+    encoder_input,decoder_input,decoder_output =vocab.get_model_data()

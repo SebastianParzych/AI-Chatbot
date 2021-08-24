@@ -18,8 +18,8 @@ class LSTMmodel():
         self._BATCH_SIZE=10
         self._EPOCHS=30
         self.encoder_decoder_layers()
-           
-    def encoder_decoder_layers(self):
+        
+    def lstm_model_1(self):
         #Encoder
         encoder_inputs = Input(shape=(None,self._encoder_tokens))
         encoder_lstm = LSTM(  self._DIMENSIONALITY, return_state=True)
