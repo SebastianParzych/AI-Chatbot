@@ -3,7 +3,11 @@ from LoadLines import LoadLines
 import re
 import numpy as np
 import pandas as pd
+
+
 class Vocabulary:
+    
+    
 	def __init__(self,data_range=1.0,max_len=10,min_len=1,min_number=2):
 		'''
 		Initialize and prepeare  parameters for data processing.
@@ -18,6 +22,7 @@ class Vocabulary:
 			data_range: float, default=1
 				fraction of data used in learning.
 		'''
+		print('Vocab initialized')
 		#_load=LoadLines # Initialize LoadLines class, to get input-target sentences
 		self.Input_raw, self.Target_raw= LoadLines.read_csv() # In order to get prepeard input-target sntences, read .csv file or run LoadLines().get_input_target()
 		self.data_range= 2 * round((data_range*len(self.Target_raw))/2) # Round always to number divisible by 2
@@ -31,6 +36,8 @@ class Vocabulary:
 		self.cleaning()
 		word_count= self.count_appears(self.Target_raw+self.Input_raw)
 		self.trim_sentences(word_count)
+  
+  
 	def get_model_data(self):
 		'''
 		return:
@@ -54,13 +61,7 @@ class Vocabulary:
 
 		return encoder_input,decoder_input,decoder_output
 
-	@staticmethod
-	def get_xd(data_set,input_max_words,input_index_word):
-		model_io= np.zeros((len(data_set),input_max_words,len(input_index_word)),dtype='float32')
-		for line,input in enumerate(data_set):
-			for timestemp,token in enumerate(input):
-				model_io[line,timestemp,token]=1
-		return model_io
+
 	def write_to_csv_index_words(self,input_index_word,target_index_word):
 		''' Save vocabularies of future chatbot to csve'''
 		df_input=pd.DataFrame.from_dict(input_index_word,orient='index',columns=['word'])
@@ -70,9 +71,12 @@ class Vocabulary:
 		df_input.to_csv('data/input_vocabulary.csv')
 		df_target.to_csv('data/target_vocabulary.csv')
   
+  
 	@staticmethod
 	def read_csv_index_words():
 		return pd.read_csv('data/input_targete_vocabulary.csv')
+
+
 	def vocabulary_parameters(self):
 		'''
 		Show the values of the parameters used in creating the vocabulary.
@@ -83,6 +87,7 @@ class Vocabulary:
 		print(f'Range of number of words in a sentence: ({self.MIN_LEN},{self.MAX_LEN})')
 		print(f'Mimnimal number of word appears in dataset: {self.MIN_NUMBER}')
 		print("-----------------------------------")
+
 
 	def cleaning(self):
 		'''
@@ -110,6 +115,8 @@ class Vocabulary:
 				pass
 		self.Input_raw= input
 		self.Target_raw=target
+  
+  
 	@staticmethod
 	def normalize(s):
 		'''
@@ -127,7 +134,7 @@ class Vocabulary:
 		s = re.sub(r"she's", "she is", s)
 		s = re.sub(r"it's", "it is", s)
 		s = re.sub(r"that's", "that is", s)
-		s = re.sub(r"what's", "that is", s)
+		s = re.sub(r"what's", "what is", s)
 		s = re.sub(r"where's", "where is", s)
 		s = re.sub(r"how's", "how is", s)
 		s = re.sub(r"\'ll", " will", s)
@@ -144,6 +151,7 @@ class Vocabulary:
 		s = re.sub(r'[0-9]+', ' ', s)
 		return s.strip()
 
+
 	def filter_length(self, input_line, target_line):
 		'''
 		Unifying the length of the sentences.
@@ -157,6 +165,7 @@ class Vocabulary:
 		'''
 		l = [len(input_line.split(' ')), len(target_line.split(' '))]
 		return all(ele >= self.MIN_LEN and ele < self.MAX_LEN for ele in l) 
+
 
 	def count_appears(self, data):
 		'''
@@ -174,6 +183,7 @@ class Vocabulary:
 					word_count[word] += 1
 
 		return word_count
+
 
 	def trim_sentences(self,word_count):
 		'''
@@ -205,6 +215,7 @@ class Vocabulary:
 		self.Input_set = keep_inputs
 		self.Target_set = keep_targets
 
+
 	def features_set(self,data,istarget):
 		'''
 		Creating an input features dictinaries index_word,word_index, 
@@ -235,6 +246,7 @@ class Vocabulary:
      
 		print(max_words)
 		return index_word,word_index, max_words
+
 
 	def summaryOfCleaning(self):
 		print('--------------------------------------------------------------')
